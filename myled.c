@@ -4,6 +4,7 @@
 #include <linux/device.h>
 #include <linux/uaccess.h>
 #include <linux/io.h>
+#include <linux/delay.h>
 
 MODULE_AUTHOR( "Takumi Ogasawara" );
 MODULE_DESCRIPTION( "driver for LED control" );
@@ -15,29 +16,56 @@ static struct cdev cdv;
 static struct class *cls = NULL;
 static volatile u32 *gpio_base = NULL;
 
+void tika_loop( int _cnt ) {
+  int cnt;
+  for( cnt=0; cnt<_cnt; cnt++ ) {
+	gpio_base[7] = 1 << 25;
+	msleep(200);
+	gpio_base[10] = 1 << 25;
+	msleep(200);
+  }
+}
+
 static ssize_t led_write( struct file* filp, const char* buf, size_t count, loff_t* pos )
 {
-  int oga;
-  int taku=0;
   char c;
   if( copy_from_user(&c, buf, sizeof(char)) )
 	return -EFAULT;
 
-  if( c == '0' ) {
+  switch( c ) {
+	case '0':
 	gpio_base[10] = 1 << 25;
-  } else if( c == '1' ) {
-	gpio_base[7] = 1 << 25;
-  } else if( c == '2' ) {
-	for( oga=0; oga<=200; oga++ ) {
-	  if( oga%10==0 ) {
-		taku++;
-	  }
-	  if( taku%2==0 ) {
-		gpio_base[7] = 1 << 25;
-	  } else{
-		gpio_base[10] = 1 << 25;
-	  }
-	}
+	break;
+	case '1':
+	tika_loop(1);
+	break;
+	case '2':
+	tika_loop(2);
+	break;
+	case '3':
+	tika_loop(3);
+	break;
+	case '4':
+	tika_loop(4);
+	break;
+	case '5':
+	tika_loop(5);
+	break;
+	case '6':
+	tika_loop(6);
+	break;
+	case '7':
+	tika_loop(7);
+	break;
+	case '8':
+	tika_loop(8);
+	break;
+	case '9':
+	tika_loop(9);
+	break;
+
+	default:
+	break;
   }
 
   return 1;
